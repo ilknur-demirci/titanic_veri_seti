@@ -9,8 +9,12 @@ summary(titanic)
 #fare değişkeni için çarpıklık analizi yapıyorum. 
 install.packages("psych")
 library(psych)
+
+boxplot(titanic$Fare, main="Bilet Fiyatı Uç Değer Analizi", col="lightblue")
+
 fare_istatistik <- describe(titanic$Fare)
 print(fare_istatistik$skew)
+
 #cinsiyet değişkenini sayısal hale getiriyorum.
 
 titanic$Sex_num <- as.numeric(titanic$Sex == "female")

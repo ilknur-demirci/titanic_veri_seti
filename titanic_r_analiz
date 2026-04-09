@@ -6,7 +6,13 @@ titanic = read.csv("https://raw.githubusercontent.com/datasciencedojo/datasets/m
 str(titanic)
 summary(titanic)
 
+#fare değişkeni için çarpıklık analizi yapıyorum. 
+install.packages("psych")
+library(psych)
+fare_istatistik <- describe(titanic$Fare)
+print(fare_istatistik$skew)
 #cinsiyet değişkenini sayısal hale getiriyorum.
+
 titanic$Sex_num <- as.numeric(titanic$Sex == "female")
 
 
@@ -30,18 +36,26 @@ barplot(table(titanic$Survived, titanic$Pclass),
         col = c("red", "green"))
 
   #Karar ağacı modeli ile hayatta kalmayı; sınıf, cinsiyet ve yaş değişkenleri üzerinden tahmin eden bir ağaç kurdum.
+
+# rpart paketini yükle
+library(rpart)
+
 set.seed(123)
 model_agac <- sample(2, nrow(titanic), replace = TRUE, prob = c(0.7, 0.3))
 
 egitim_verisi <- titanic[model_agac == 1, ]
 test_verisi <- titanic[model_agac == 2, ]
-egitim_modeli <- rpart(Survived ~ Pclass + Sex + Age, 
-                     data = egitim_verisi, 
+egitim_modeli <- rpart(Survived ~ Pclass + Sex + Age,
+                     data = egitim_verisi,
                      method = "class")
-tahminler <- predict(agac_modeli, test_verisi, type = "class")
+tahminler <- predict(egitim_modeli, test_verisi, type = "class") # agac_modeli yerine egitim_modeli kullanıldı
 tablo <- table(test_verisi$Survived, tahminler)
 print(tablo)
 
+#modelin doğruluk oranı
+
+dogruluk <- sum(diag(tablo)) / sum(tablo)
+print(paste("Modelin Doğruluk Oranı: %", round(dogruluk * 100, 2)))
 #modelin doğruluk oranı
 
 dogruluk <- sum(diag(tablo)) / sum(tablo)

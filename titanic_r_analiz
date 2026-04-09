@@ -1,0 +1,48 @@
+#veriyi online ortamdan getiriyorum.
+
+titanic = read.csv("https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv")
+
+#veri yapısını inceliyorum.
+str(titanic)
+summary(titanic)
+
+#cinsiyet değişkenini sayısal hale getiriyorum.
+titanic$Sex_num <- as.numeric(titanic$Sex == "female")
+
+
+#eksik veri  analizi yapıyorum.
+
+colSums(is.na(titanic))
+#eksik verileri ortalama ile dolduruyorum.
+titanic$Age[is.na(titanic$Age)] <- mean(titanic$Age, na.rm = TRUE)
+
+#Korelasyon analizi yapıyorum.
+
+# Survived (0=Öldü, 1=Kurtuldu)
+
+degiskenler <- titanic[, c("Survived", "Pclass", "Sex_num", "Age")]
+cor(degiskenler)
+
+barplot(table(titanic$Survived, titanic$Pclass),
+        beside = TRUE,
+        legend = c("Öldü", "Kurtuldu"),
+        main = "Bilet Sınıfına Göre Hayatta Kalma",
+        col = c("red", "green"))
+
+  #Karar ağacı modeli ile hayatta kalmayı; sınıf, cinsiyet ve yaş değişkenleri üzerinden tahmin eden bir ağaç kurdum.
+set.seed(123)
+model_agac <- sample(2, nrow(titanic), replace = TRUE, prob = c(0.7, 0.3))
+
+egitim_verisi <- titanic[model_agac == 1, ]
+test_verisi <- titanic[model_agac == 2, ]
+egitim_modeli <- rpart(Survived ~ Pclass + Sex + Age, 
+                     data = egitim_verisi, 
+                     method = "class")
+tahminler <- predict(agac_modeli, test_verisi, type = "class")
+tablo <- table(test_verisi$Survived, tahminler)
+print(tablo)
+
+#modelin doğruluk oranı
+
+dogruluk <- sum(diag(tablo)) / sum(tablo)
+print(paste("Modelin Doğruluk Oranı: %", round(dogruluk * 100, 2)))
